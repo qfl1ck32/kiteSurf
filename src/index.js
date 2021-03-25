@@ -1,12 +1,25 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React, { Component } from 'react'
+import ReactDOM from 'react-dom'
+import './index.css'
+import reportWebVitals from './reportWebVitals'
+
+import { BrowserRouter, Route, Redirect, Switch } from 'react-router-dom'
+
+import Login from './components/Login'
+import Dashboard from './components/Dashboard'
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+
+    <BrowserRouter>
+      <Switch>
+        <Route path = '/Login' exact component = { Login } />
+        <Route path = '/Dashboard' component = { Dashboard } />
+
+        <Redirect to = '/Dashboard' />
+      </Switch>
+    </BrowserRouter>
+
   </React.StrictMode>,
   document.getElementById('root')
 );

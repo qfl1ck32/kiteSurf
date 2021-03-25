@@ -1,21 +1,40 @@
-import React from 'react'
-
-import '../assets/css/login.css'
-
-import Kite from '../assets/images/Kite.svg'
+import React, { useEffect, useState } from 'react'
+import { Redirect } from 'react-router-dom'
 
 import { MDBContainer, MDBJumbotron } from 'mdbreact'
 import { Form, Image, Button } from 'react-bootstrap'
 
-import * as Yup from 'yup'
-import { useFormik } from 'formik'
+import NewField from '../components/FormField'
+import useLocalStorage from '../services/useLocalStorage'
+
+import '../assets/css/main.css'
+import Kite from '../assets/images/Kite.svg'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'mdbreact/dist/css/mdb.css'
 
-import NewField from '../components/FormField'
+import * as Yup from 'yup'
+import { useFormik } from 'formik'
 
-function Login() {
+import axios from 'axios'
+
+const apiURL = require('../assets/apiURL.json').url
+
+function Login(props) {
+
+    const [userID, setUserID] = useLocalStorage('userID')
+    const [redirect, setRedirect] = useState(false)
+
+    useEffect(() => {
+        if (userID != null)
+            setRedirect(true)
+    }, [userID])
+
+    const [loginMessage, setLoginMessage] = useState({
+        hide: true,
+        danger: false,
+        message: ''
+    })
 
     const validationSchema = Yup.object({
         username: Yup.string()
@@ -28,14 +47,48 @@ function Login() {
 
     const { errors, touched, values, handleChange, handleSubmit, setValues } = useFormik({
         initialValues: {
-            username: '',
-            password: '',
+            username: 'qfl1ck32',
+            password: 'ABABABAB',
 
             fadeErrors: true
         },
 
         onSubmit: async () => {
-            // login
+            let request
+            
+            try {
+                request = await axios.get(apiURL + 'user')
+            }
+
+            catch (err) {
+                const requestResponse = err.response
+
+                return setLoginMessage({
+                    hide: false,
+                    danger: true,
+                    message: 'Something went wrong. Server replied with: "' + requestResponse.data + '".'
+                })
+            }
+
+            const users = request.data
+
+            const randomUserIndex = Math.floor(Math.random() * Object.keys(users).length)
+            
+            const user = users[randomUserIndex]
+
+            setLoginMessage({
+                hide: false,
+                danger: false,
+                message: 'Successfully logged in!'
+            })
+
+            setUserID(user.id)
+
+            await new Promise(resolve => {
+                setTimeout(resolve, 1000)
+            })
+
+            setRedirect(true)
         },
 
         validationSchema
@@ -49,6 +102,10 @@ function Login() {
         setTimeout(() => {
             setValues({...values, ...{'fadeErrors': true}})
         }, 0)
+
+        setLoginMessage({
+            hide: true
+        })
     }
 
     const newFieldSetup = (name, fieldName, placeholder, type) => {
@@ -67,12 +124,17 @@ function Login() {
     const username = NewField(newFieldSetup('Username', 'username', 'George', 'text'))
     const password = NewField(newFieldSetup('Password', 'password', '••••••••', 'password'))
 
-    return (
+    return redirect ? (<Redirect to = '/Dashboard' />) :
+    (
         <MDBContainer fluid className = 'main d-flex align-items-center justify-content-center'>
             <MDBJumbotron className = 'w-50 bg-primary'>
 
                 <MDBContainer className = 'display-4 text-center'>
                     <Image fluid src = { Kite } />
+                </MDBContainer>
+
+                <MDBContainer className = { loginMessage.hide ? 'd-none' : ('alert ' + (loginMessage.danger ? 'alert-danger' : 'alert-success')) }>
+                    { loginMessage.message }
                 </MDBContainer>
 
                 <Form className = 'text-center' noValidate onSubmit = { handleSubmitFadeErrors }>

@@ -30,7 +30,6 @@ const FormField = (props) => (
 )
 
 export default function NewField(props) {
-    console.log('creat')
     return (
         <FormField 
             name = { props.name }

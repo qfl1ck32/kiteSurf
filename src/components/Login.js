@@ -47,8 +47,8 @@ function Login(props) {
 
     const { errors, touched, values, handleChange, handleSubmit, setValues } = useFormik({
         initialValues: {
-            username: 'qfl1ck32',
-            password: 'ABABABAB',
+            username: '',
+            password: '',
 
             fadeErrors: true
         },

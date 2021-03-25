@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom'
 import './index.css'
 import reportWebVitals from './reportWebVitals'
@@ -7,6 +7,7 @@ import { BrowserRouter, Route, Redirect, Switch } from 'react-router-dom'
 
 import Login from './components/Login'
 import Dashboard from './components/Dashboard'
+
 
 ReactDOM.render(
   <React.StrictMode>

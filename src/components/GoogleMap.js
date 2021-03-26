@@ -4,33 +4,34 @@ import { MDBContainer, MDBRow } from 'mdbreact'
 
 import { GoogleMap as GM, Marker, InfoWindow, LoadScript,  } from '@react-google-maps/api'
 
+const SpotInfoContainer = props => {
+    return (
+        <>
+            <MDBRow className = 'h6'> { props.name } </MDBRow>
+            <MDBRow className = 'ml-2 font-weight-bold'> { props.value } </MDBRow>
+        </>
+    )
+}
+
 function MarkerInfoWindow(props) {
     const spot = props.activeMarker
 
     return spot ? (
         <InfoWindow  anchor = { props.markerMap[spot.id] } visible onCloseClick = { props.onInfoWindowCloseClick }>
-            <MDBContainer style = { { width: '256px', height: 'auto' } } fluid className = 'text-primary'>
+            <MDBContainer style = { props.markerInfoWindowStyle } fluid className = 'text-primary'>
                 <MDBRow className = 'h5 text-center d-flex justify-content-center'> { spot.country || 'Missing country' } </MDBRow>
-                
+                <hr />
+
+                <SpotInfoContainer name = 'Wind probability' value = { spot.probability ? spot.probability + '%' : 'Missing probability' } />
                 <br />
 
-                <MDBRow className = 'h6'>Wind probability</MDBRow>
-                <MDBRow className = 'ml-2 font-weight-bold'> { spot.probability ? spot.probability + '%' : 'Missing probability' } </MDBRow>
-
+                <SpotInfoContainer name = 'Latitude' value = { spot.lat } />
                 <br />
 
-                <MDBRow className = 'h6'>Latitude</MDBRow>
-                <MDBRow className = 'ml-2 font-weight-bold'> { spot.lat } </MDBRow>
-
+                <SpotInfoContainer name = 'Longitude' value = { spot.long } />
                 <br />
 
-                <MDBRow className = 'h6'>Longitude</MDBRow>
-                <MDBRow className = 'ml-2 font-weight-bold'> { spot.long } </MDBRow>
-
-                <br />
-
-                <MDBRow className = 'h6'>When to go</MDBRow>
-                <MDBRow className = 'ml-2 font-weight-bold'> { spot.month } </MDBRow>
+                <SpotInfoContainer name = 'When to go' value = { spot.month } />
 
             </MDBContainer>
         </InfoWindow>
@@ -47,6 +48,8 @@ const Markers = (props) => (
 )
 
 const GoogleMap = props => {
+
+    const { spots } = props
 
     const [map, setMap] = useState(null)
 
@@ -74,13 +77,22 @@ const GoogleMap = props => {
         })
     }
 
-    const onInfoWindowCloseClick = () => {
-        setActiveMarker(null)
+    const onInfoWindowCloseClick = e => {
+        if (props.setCurrentSpot == null)
+            return setActiveMarker(null)
+        
+        const latLng = e.latLng
+        
+        props.setCurrentSpot({
+            lat: parseFloat(latLng.lat()),
+            long: parseFloat(latLng.lng()),
+            id: Math.floor(Math.random() * 10000)
+        })
+
     }
 
-    const { spots } = props
-
     const coordsFromMarkerData = markerData => {
+
         return {
             lat: parseFloat(markerData.lat),
             lng: parseFloat(markerData.long)
@@ -94,20 +106,29 @@ const GoogleMap = props => {
         onMarkerLoad
     })
 
-    return (
-        <LoadScript googleMapsApiKey = 'AIzaSyCAJ-0Vpt1GD14pIRtiNzTuby6fmEu1FYg'>
-            <GM onClick = { onInfoWindowCloseClick }
-                onLoad = { onLoad }
-                onUnmount = { onUnmount }
-                mapContainerStyle = { props.mapContainerStyle }
-                zoom = { props.defaultZoom }
-                center = { props.defaultCenter }>
-                
-                { MapMarkers }
+    const GoogleMapInstance = 
+    (
+        <GM onClick = { e => onInfoWindowCloseClick(e) }
+            onLoad = { onLoad }
+            onUnmount = { onUnmount }
+            mapContainerStyle = { props.mapContainerStyle }
+            zoom = { props.defaultZoom }
+            center = { props.defaultCenter }>
+            
+            { MapMarkers }
 
-                <MarkerInfoWindow markerMap = { markerMap } activeMarker = { activeMarker } onInfoWindowCloseClick = { onInfoWindowCloseClick } />
-            </GM>
+            <MarkerInfoWindow markerInfoWindowStyle = { props.markerInfoWindowStyle } markerMap = { markerMap } activeMarker = { activeMarker } onInfoWindowCloseClick = { onInfoWindowCloseClick } />
+        </GM>
+    )
+
+    return (
+        props.withWrap ? 
+
+        <LoadScript googleMapsApiKey = 'AIzaSyCAJ-0Vpt1GD14pIRtiNzTuby6fmEu1FYg'>
+            { GoogleMapInstance }
         </LoadScript>
+
+        : GoogleMapInstance
     )
 }
 

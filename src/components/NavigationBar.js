@@ -9,47 +9,55 @@ import Kite from '../assets/images/Kite.svg'
 import ProfileDropdown from './ProfileDropdown'
 import useLocalStorage from '../services/useLocalStorage'
 
-function NavigationBar() {
+import AddSpotModal from '../components/AddSpotModal'
+
+function NavigationBar(props) {
+
     const user = useLocalStorage('user')[0]
 
     const [collapse, setCollapse] = useState(false)
+    const [isOpen, setIsOpen] = useState(false)
 
     const onClickToggler = () => {
         setCollapse(currentState => !currentState)
     }
 
-    const addSpot = async () => {
-
+    const openSpotModal = async () => {
+        setIsOpen(true)
     }
 
     return (
-        <MDBNavbar className = 'mb-4' dark expand = 'md' scrolling>
+        <>
+            <AddSpotModal isOpen = { isOpen } setIsOpen = { setIsOpen }/>
 
-            <MDBNavbarBrand>
-                <Image fluid width = { 80 } src = { Kite } />
-            </MDBNavbarBrand>
+            <MDBNavbar className = 'mb-4' dark expand = 'md' scrolling>
 
-            <MDBNavbarToggler onClick = { onClickToggler } />
+                <MDBNavbarBrand>
+                    <Image fluid width = { 80 } src = { Kite } />
+                </MDBNavbarBrand>
 
-            <MDBCollapse isOpen = { collapse } navbar>
-                <MDBNavbarNav right>
+                <MDBNavbarToggler onClick = { onClickToggler } />
 
-                { user &&
-                     
-                    <MDBNavItem>
-                        <Button onClick = { addSpot }>Add spot</Button>
-                    </MDBNavItem>
+                <MDBCollapse isOpen = { collapse } navbar>
+                    <MDBNavbarNav right>
 
-                }
+                    { user && !props.isLoading &&
+                        
+                        <MDBNavItem>
+                            <Button onClick = { openSpotModal }>Add spot</Button>
+                        </MDBNavItem>
 
-                    <MDBNavItem>
-                        <ProfileDropdown user = { user } />
-                    </MDBNavItem>
-                    
-                </MDBNavbarNav>
-            </MDBCollapse>
+                    }
 
-        </MDBNavbar>
+                        <MDBNavItem>
+                            <ProfileDropdown user = { user } />
+                        </MDBNavItem>
+                        
+                    </MDBNavbarNav>
+                </MDBCollapse>
+
+            </MDBNavbar>
+        </>
     )
 }
 

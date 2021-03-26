@@ -30,8 +30,8 @@ function Dashboard() {
     }
 
     const center = {
-        lat: user?.lat || 47,
-        lng: user?.lng || 26
+        lat: user?.lat || 0,
+        lng: user?.lng || 0
     }
 
     const [spots, setSpots] = useState([])
@@ -50,7 +50,6 @@ function Dashboard() {
 
         setSpots(request.data)
         setIsLoading(false)
-        console.log(user)
     }
 
     useEffect(() => {
@@ -59,12 +58,11 @@ function Dashboard() {
 
     return (
         <MDBContainer fluid className = 'main text-light'>
-            <NavigationBar />
-
+            <NavigationBar isLoading = { isLoading } />
             {
                 isLoading ? <LoadingScreen /> : 
                 <Container fluid className = 'd-flex justify-content-center'>
-                    <GoogleMap center = { center } zoom = { 8 } spots = { spots } mapContainerStyle = { mapContainerStyle } />
+                    <GoogleMap withWrap center = { center } zoom = { 6 } spots = { spots } mapContainerStyle = { mapContainerStyle } />
                 </Container>
             }
 

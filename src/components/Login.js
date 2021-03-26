@@ -26,6 +26,7 @@ function Login(props) {
     const [redirect, setRedirect] = useState(false)
 
     useEffect(() => {
+        localStorage.clear()
         if (user != null)
             setRedirect(true)
     }, [])

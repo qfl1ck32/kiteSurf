@@ -1,4 +1,6 @@
 .main {
     min-height: 100vh;
     background-color: #426ef4;
+    overflow-y: hidden;
+    overflow-x: hidden;
 }

@@ -22,13 +22,51 @@ const apiURL = require('../assets/apiURL.json').url
 
 function Login(props) {
 
-    const [userID, setUserID] = useLocalStorage('userID')
+    const [user, setUser] = useLocalStorage('user')
     const [redirect, setRedirect] = useState(false)
 
     useEffect(() => {
-        if (userID != null)
+        if (user != null)
             setRedirect(true)
-    }, [userID])
+    }, [])
+
+    const tryLogin = async () => {
+        let request
+            
+        try {
+            request = await axios.get(apiURL + 'user')
+        }
+
+        catch (err) {
+            const requestResponse = err.response
+
+            return setLoginMessage({
+                hide: false,
+                danger: true,
+                message: 'Something went wrong. Server replied with: "' + requestResponse.data + '".'
+            })
+        }
+
+        const users = request.data
+
+        const randomUserIndex = Math.floor(Math.random() * Object.keys(users).length)
+        
+        const user = users[randomUserIndex]
+
+        setUser(user)
+
+        setLoginMessage({
+            hide: false,
+            danger: false,
+            message: 'Successfully logged in!'
+        })
+
+        await new Promise(resolve => {
+            setTimeout(resolve, 1000)
+        })
+        
+        setRedirect(true)
+    }
 
     const [loginMessage, setLoginMessage] = useState({
         hide: true,
@@ -47,49 +85,13 @@ function Login(props) {
 
     const { errors, touched, values, handleChange, handleSubmit, setValues } = useFormik({
         initialValues: {
-            username: '',
-            password: '',
+            username: 'qf',
+            password: '123123',
 
             fadeErrors: true
         },
 
-        onSubmit: async () => {
-            let request
-            
-            try {
-                request = await axios.get(apiURL + 'user')
-            }
-
-            catch (err) {
-                const requestResponse = err.response
-
-                return setLoginMessage({
-                    hide: false,
-                    danger: true,
-                    message: 'Something went wrong. Server replied with: "' + requestResponse.data + '".'
-                })
-            }
-
-            const users = request.data
-
-            const randomUserIndex = Math.floor(Math.random() * Object.keys(users).length)
-            
-            const user = users[randomUserIndex]
-
-            setLoginMessage({
-                hide: false,
-                danger: false,
-                message: 'Successfully logged in!'
-            })
-
-            setUserID(user.id)
-
-            await new Promise(resolve => {
-                setTimeout(resolve, 1000)
-            })
-
-            setRedirect(true)
-        },
+        onSubmit: tryLogin,
 
         validationSchema
     })

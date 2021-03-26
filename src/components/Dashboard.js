@@ -1,57 +1,73 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
-import { MDBContainer, MDBNavbar, MDBNavbarBrand,
-         MDBNavbarNav, MDBCollapse, MDBNavbarToggler,
-         MDBNavItem } from 'mdbreact'
+import { MDBContainer } from 'mdbreact'
 
-import { Image, Button } from 'react-bootstrap'
+import { Container } from 'react-bootstrap'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'mdbreact/dist/css/mdb.css'
 import '../assets/css/main.css'
 
-import Kite from '../assets/images/Kite.svg'
+import NavigationBar from '../components/NavigationBar'
 
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome' // will use
-// import { faUserCircle } from '@fortawesome/free-solid-svg-icons'
+import axios from 'axios'
 
-import ProfileDropdown from './ProfileDropdown'
+import LoadingScreen from '../components/LoadingScreen'
+
 import useLocalStorage from '../services/useLocalStorage'
 
-function Dashboard(props) {
+import GoogleMap from './GoogleMap'
 
-    const userID = useLocalStorage('userID')[0]
+const apiURL = require('../assets/apiURL.json').url
 
-    const [collapse, setCollapse] = useState(false)
+function Dashboard() {
 
-    const onClick = () => {
-        setCollapse(currentState => !currentState)
+    const user = useLocalStorage('user')[0]
+
+    const mapContainerStyle = {
+        width: '1920px',
+        height: '720px'
     }
+
+    const center = {
+        lat: user?.lat || 47,
+        lng: user?.lng || 26
+    }
+
+    const [spots, setSpots] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
+
+    const fetchData = async () => {
+        let request
+        
+        try {
+            request = await axios.get(apiURL + 'spot')
+        }
+
+        catch (err) {
+            return console.log('err') // will have to change
+        }
+
+        setSpots(request.data)
+        setIsLoading(false)
+        console.log(user)
+    }
+
+    useEffect(() => {
+        fetchData()
+    }, [])
 
     return (
         <MDBContainer fluid className = 'main text-light'>
-            <MDBNavbar dark expand = 'md' scrolling fixed = 'top'>
+            <NavigationBar />
 
-                <MDBNavbarBrand>
-                    <Image fluid width = { 80 } src = { Kite } />
-                </MDBNavbarBrand>
+            {
+                isLoading ? <LoadingScreen /> : 
+                <Container fluid className = 'd-flex justify-content-center'>
+                    <GoogleMap center = { center } zoom = { 8 } spots = { spots } mapContainerStyle = { mapContainerStyle } />
+                </Container>
+            }
 
-                <MDBNavbarToggler onClick = { onClick } />
-
-                <MDBCollapse isOpen = { collapse } navbar>
-                    <MDBNavbarNav right>
-
-                        <MDBNavItem>
-                            <Button>Add spot</Button>
-                        </MDBNavItem>
-
-                        <MDBNavItem>
-                            <ProfileDropdown userID = { userID } />
-                        </MDBNavItem>
-                    </MDBNavbarNav>
-                </MDBCollapse>
-
-            </MDBNavbar>
         </MDBContainer>
     )
 }

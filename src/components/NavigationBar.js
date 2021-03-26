@@ -9,7 +9,7 @@ import Kite from '../assets/images/Kite.svg'
 import ProfileDropdown from './ProfileDropdown'
 import useLocalStorage from '../services/useLocalStorage'
 
-function NavigationBar(props) {
+function NavigationBar() {
     const user = useLocalStorage('user')[0]
 
     const [collapse, setCollapse] = useState(false)
@@ -19,7 +19,7 @@ function NavigationBar(props) {
     }
 
     const addSpot = async () => {
-        
+
     }
 
     return (

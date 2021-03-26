@@ -2,7 +2,6 @@ import React, { useState, useCallback } from 'react'
 
 import { MDBContainer, MDBRow } from 'mdbreact'
 
-
 import { GoogleMap as GM, Marker, InfoWindow, LoadScript,  } from '@react-google-maps/api'
 
 function MarkerInfoWindow(props) {

@@ -18,6 +18,12 @@ const apiURL = require('../assets/apiURL.json').url
 
 function Dashboard() {
 
+    const [spots, setSpots] = useState([])
+    const [favourites, setFavourites] = useState([])
+    const [loadingMessage, setLoadingMessage] = useState('Please wait while we are loading the map...')
+    const [tableData, setTableData] = useState({})
+    const [isLoading, setIsLoading] = useState(true)
+
     const mapContainerStyle = {
         width: '1920px',
         height: '720px',
@@ -28,11 +34,6 @@ function Dashboard() {
         lat: 45.9443,
         lng: 25.0094
     }
-
-    const [spots, setSpots] = useState([])
-    const [favourites, setFavourites] = useState([])
-    const [loadingMessage, setLoadingMessage] = useState('Please wait while we are loading the map...')
-    const [isLoading, setIsLoading] = useState(true)
 
     const fetchData = async (requestCount = 0) => {
         let requestSpots, requestFavourites

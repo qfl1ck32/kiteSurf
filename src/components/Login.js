@@ -20,7 +20,7 @@ import axios from 'axios'
 
 const apiURL = require('../assets/apiURL.json').url
 
-function Login(props) {
+function Login() {
 
     const [user, setUser] = useLocalStorage('user')
     const [redirect, setRedirect] = useState(false)
@@ -30,28 +30,42 @@ function Login(props) {
             setRedirect(true)
     }, [])
 
+    const setRequestFailedMessage = response => {
+        return setLoginMessage({
+            hide: false,
+            danger: true,
+            message: 'Something went wrong. Server replied with: "' + response.data + '".'
+        })
+    }
+
     const tryLogin = async () => {
-        let request
+        let loginRequest, loginLogID
             
         try {
-            request = await axios.get(apiURL + 'user')
+            loginRequest = await axios.get(apiURL + 'user')
+
+            const newLoginLog = await axios.post(apiURL + 'login')
+            
+            loginLogID = newLoginLog.data.id
         }
 
         catch (err) {
-            const requestResponse = err.response
-
-            return setLoginMessage({
-                hide: false,
-                danger: true,
-                message: 'Something went wrong. Server replied with: "' + requestResponse.data + '".'
-            })
+            return setRequestFailedMessage(err.response.data)
         }
 
-        const users = request.data
+        const users = loginRequest.data
 
         const randomUserIndex = Math.floor(Math.random() * Object.keys(users).length)
         
         const user = users[randomUserIndex]
+
+        try {
+            await axios.put(apiURL + 'login/' + loginLogID, { userId: user.id })
+        }
+
+        catch (err) {
+            return setRequestFailedMessage(err.response.data)
+        }
 
         setUser(user)
 

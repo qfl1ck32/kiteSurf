@@ -1,8 +1,12 @@
 .filterIcon {
     position: absolute;
-    width: 32px;
-    height: 32px;
     top: 4em;
     right: 4em;
     cursor: pointer;
+    width: auto;
+}
+
+.filterIconSize {
+    width: 32px;
+    height: 32px;
 }

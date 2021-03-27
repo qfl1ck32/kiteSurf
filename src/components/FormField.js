@@ -4,7 +4,7 @@ import { Form } from 'react-bootstrap'
 
 import '../assets/css/formField.css'
 
-const FormField = (props) => (
+const FormField = props => (
     <Form.Group className = 'text-left'>
         <Form.Label className = 'text-white'>{ props.name + ':' }</Form.Label>
 
@@ -20,7 +20,7 @@ const FormField = (props) => (
             placeholder = { props.placeHolder }
             className = 'mb-1 rounded' />
 
-        <MDBContainer className = { 'text-left alert alert-danger rounded ' + (props.errors[props.fieldName] && (props.values[props.fieldName] || props.touched[props.fieldName]) ? (props.values.fadeErrors ? 'fadeIn' : 'hidden') : 'd-none') }>
+        <MDBContainer className = { 'text-left alert alert-danger rounded ' + (props.errors[props.fieldName] && (props.values[props.fieldName] || props.touched[props.fieldName]) ? (props.values.fadeErrors ? 'fadein' : 'hidden') : 'd-none') }>
         
             { props.errors[props.fieldName] && (props.values[props.fieldName] || props.touched[props.fieldName]) ? props.errors[props.fieldName] : '' }
         

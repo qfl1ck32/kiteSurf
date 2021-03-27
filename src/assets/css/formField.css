@@ -33,6 +33,6 @@
     font-size: 0;
 }
 
-.fadeIn {
+.fadein {
     animation: fadeSlow 0.5s;
 }

@@ -10,6 +10,9 @@ import useLocalStorage from '../services/useLocalStorage'
 import Filter from '../assets/images/Filter.svg'
 import '../assets/css/googleMap.css'
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faPlus, faMinus } from '@fortawesome/free-solid-svg-icons'
+
 import axios from 'axios'
 
 const apiURL = require('../assets/apiURL.json').url
@@ -19,6 +22,31 @@ const SpotInfoContainer = props => {
         <>
             <MDBRow className = 'h6'> { props.name } </MDBRow>
             <MDBRow className = 'ml-2 font-weight-bold'> { props.value } </MDBRow>
+        </>
+    )
+}
+
+const MarkerFavouriteButton = props => {
+
+    let iconAndText
+
+    if (props.isFavourite)
+        iconAndText = {
+            icon: faMinus,
+            text: 'Remove from favourites'
+        }
+    else
+        iconAndText = {
+            icon: faPlus,
+            text: 'Add to favourites'
+        }
+
+    return (
+        <>
+            <FontAwesomeIcon icon = { iconAndText.icon } />
+            <MDBContainer className = 'd-inline ml-1'>
+                { iconAndText.text }
+            </MDBContainer>
         </>
     )
 }
@@ -69,7 +97,7 @@ function MarkerInfoWindow(props) {
            
         <InfoWindow  anchor = { props.markerMap[spot.id] } visible onCloseClick = { props.onInfoWindowCloseClick }>
             <MDBContainer style = { props.markerInfoWindowStyle } fluid className = 'text-primary'>
-                <MDBRow className = 'h5 text-center d-flex justify-content-center'> { spot.country || 'Missing country' } </MDBRow>
+                <MDBRow className = 'h5 text-center d-flex justify-content-center'> { spot.country } </MDBRow>
                 <hr />
 
                 <SpotInfoContainer name = 'Name' value = { spot.name } />
@@ -91,7 +119,9 @@ function MarkerInfoWindow(props) {
                 {
                     props.user == null ? null :
                     <MDBContainer className = 'd-flex justify-content-center'>
-                        <Button onClick = { manageFavourites } className = 'bg-secondary'> { ( isFavourite ? 'Remove from' : 'Add to') + ' favourites' } </Button>
+                        <Button onClick = { manageFavourites } className = 'bg-secondary'>
+                            <MarkerFavouriteButton isFavourite = { isFavourite } />
+                        </Button>
                     </MDBContainer>
                 }
 
@@ -121,21 +151,19 @@ const Markers = (props) => (
 
 const GoogleMap = props => {
 
-    const { favourites } = props
-
-    const initialSpots = props.spots
-
-    useEffect(() => {
-        setSpots(initialSpots)
-    }, [initialSpots])
-
-    const user = useLocalStorage('user')[0]
-
+    const allSpots = props.spots
     const [activeMarker, setActiveMarker] = useState(null)
     const [markerMap, setMarkerMap] = useState({})
     const [markerMapFavourites, setMarkerMapFavourites] = useState({})
     const [spots, setSpots] = useState(props.spots)
     const [filterOpened, setFilterOpened] = useState(false)
+
+    useEffect(() => {
+        setSpots(allSpots)
+    }, [allSpots])
+
+    const { favourites } = props
+    const user = useLocalStorage('user')[0]
 
     const addToFavourites = (spot, newFavourite) => {
         setMarkerMapFavourites(prevState => {
@@ -144,7 +172,7 @@ const GoogleMap = props => {
     }
 
     const resetFilters = () => {
-        setSpots(initialSpots)
+        setSpots(allSpots)
     }
 
     const customIcon = others => Object.assign({
@@ -218,7 +246,6 @@ const GoogleMap = props => {
             return { ...prevState, [spot.id]: favouriteData }
         })
 
-
         newMarker.setIcon(newIcon(isFavourite))
 
         setMarkerMap(prevState => {
@@ -261,7 +288,12 @@ const GoogleMap = props => {
             center = { props.center }>
 
             {
-                props.showFilter ? <Image onClick = { changeFilterState } fluid src = { Filter } className = 'filterIcon' /> : null
+                props.showFilter ? 
+                <MDBContainer onClick = { changeFilterState } className = 'filterIcon d-flex bg-secondary rounded'>
+                    <Image src = { Filter } className = 'filterIconSize mt-1' />
+                    <MDBContainer fluid className = 'h5 text-center mt-2 text-white'>Filter</MDBContainer>
+                </MDBContainer>
+                : null
             }
         
             { MapMarkers }

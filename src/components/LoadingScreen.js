@@ -3,12 +3,12 @@ import React from 'react'
 import { MDBJumbotron, MDBContainer } from 'mdbreact'
 import { Spinner } from 'react-bootstrap'
 
-function LoadingScreen() {
+function LoadingScreen(props) {
 
     return (
         <MDBJumbotron className = 'bg-primary text-center'>
             <MDBContainer fluid className = 'mb-2'>
-                Please wait while we are loading the map...
+                { props.loadingMessage }
             </MDBContainer>
 
             <Spinner animation = 'grow' variant = 'info'/>

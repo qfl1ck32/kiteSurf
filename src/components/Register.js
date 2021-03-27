@@ -20,9 +20,9 @@ import axios from 'axios'
 
 const apiURL = require('../assets/apiURL.json').url
 
-function Login(props) {
+function Register() {
 
-    const [user, setUser] = useLocalStorage('user')
+    const user = useLocalStorage('user')[0]
     const [redirect, setRedirect] = useState(false)
 
     useEffect(() => {
@@ -30,35 +30,31 @@ function Login(props) {
             setRedirect(true)
     }, [])
 
-    const tryLogin = async () => {
-        let request
+    const tryRegister = async () => {
+        let newUser
             
         try {
-            request = await axios.get(apiURL + 'user')
+            newUser = await axios.post(apiURL + 'user')
+
+            const newUserID = newUser.data.id
+
+            await axios.put(apiURL + 'user/' + newUserID, { email: values.email, username: values.username, password: values.password })
         }
 
         catch (err) {
             const requestResponse = err.response
 
-            return setLoginMessage({
+            return setRegisterMessage({
                 hide: false,
                 danger: true,
                 message: 'Something went wrong. Server replied with: "' + requestResponse.data + '".'
             })
         }
 
-        const users = request.data
-
-        const randomUserIndex = Math.floor(Math.random() * Object.keys(users).length)
-        
-        const user = users[randomUserIndex]
-
-        setUser(user)
-
-        setLoginMessage({
+        setRegisterMessage({
             hide: false,
             danger: false,
-            message: 'Successfully logged in!'
+            message: 'Successfully registered!'
         })
 
         await new Promise(resolve => {
@@ -68,7 +64,7 @@ function Login(props) {
         setRedirect(true)
     }
 
-    const [loginMessage, setLoginMessage] = useState({
+    const [registerMessage, setRegisterMessage] = useState({
         hide: true,
         danger: false,
         message: ''
@@ -78,20 +74,29 @@ function Login(props) {
         username: Yup.string()
             .required('This field should not be empty.')
             .min(2, 'Username should have a length of at least two characters.'),
+        email: Yup.string()
+            .required('This field should not be empty.')
+            .email('Invalid e-mail.'),
         password: Yup.string()
             .required('This field should not be empty.')
+            .min(6, 'Password should be at least 6 characters long.'),
+        confirmPassword: Yup.string()
+            .required('This field should not be empty.')
             .min(6, 'Password should be at least 6 characters long.')
+            .oneOf([Yup.ref('password'), null], 'Passwords must match.')
     })
 
     const { errors, touched, values, handleChange, handleSubmit, setValues } = useFormik({
         initialValues: {
             username: '',
+            email: '',
             password: '',
+            confirmPassword: '',
 
             fadeErrors: true
         },
 
-        onSubmit: tryLogin,
+        onSubmit: tryRegister,
 
         validationSchema
     })
@@ -105,7 +110,7 @@ function Login(props) {
             setValues({...values, ...{'fadeErrors': true}})
         }, 0)
 
-        setLoginMessage({
+        setRegisterMessage({
             hide: true
         })
     }
@@ -124,26 +129,31 @@ function Login(props) {
     }
 
     const username = NewField(newFieldSetup('Username', 'username', 'George', 'text'))
+    const email = NewField(newFieldSetup('Email', 'email', 'niceAccount@gmail.com', 'email'))
     const password = NewField(newFieldSetup('Password', 'password', '••••••••', 'password'))
+    const confirmPassword = NewField(newFieldSetup('Confirm password', 'confirmPassword', '••••••••', 'password'))
 
-    return redirect ? <Redirect to = '/Dashboard' /> :
+    return redirect ? (<Redirect to = '/Login' />) :
     (
         <MDBContainer fluid className = 'main d-flex align-items-center justify-content-center'>
+
             <MDBJumbotron className = 'w-50 bg-primary'>
 
                 <MDBContainer className = 'display-4 text-center'>
                     <Image fluid src = { Kite } />
                 </MDBContainer>
 
-                <MDBContainer className = { loginMessage.hide ? 'd-none' : ('alert ' + (loginMessage.danger ? 'alert-danger' : 'alert-success')) }>
-                    { loginMessage.message }
+                <MDBContainer className = { registerMessage.hide ? 'd-none' : ('alert ' + (registerMessage.danger ? 'alert-danger' : 'alert-success')) }>
+                    { registerMessage.message }
                 </MDBContainer>
 
                 <Form className = 'text-center' noValidate onSubmit = { handleSubmitFadeErrors }>
                     { username }
+                    { email }
                     { password }
+                    { confirmPassword }
 
-                    <Button className = 'text-white bg-primary' type = 'submit'>Login</Button> 
+                    <Button className = 'text-white bg-primary' type = 'submit'>Register</Button> 
                 </Form>
 
             </MDBJumbotron>
@@ -151,4 +161,4 @@ function Login(props) {
     )
 }
 
-export default Login
+export default Register

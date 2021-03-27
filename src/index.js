@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals'
 import { BrowserRouter, Route, Redirect, Switch } from 'react-router-dom'
 
 import Login from './components/Login'
+import Register from './components/Register'
 import Dashboard from './components/Dashboard'
 import Logout from './components/Logout'
 
@@ -13,6 +14,7 @@ class Root extends Component {
 
   render() {
     return (
+
       <BrowserRouter>
         <Switch>
           
@@ -20,15 +22,19 @@ class Root extends Component {
             <Login />
           </Route>
 
+          <Route path = '/Register' exact>
+            <Register />
+          </Route>
+
           <Route path = '/Dashboard' exact>
             <Dashboard />
           </Route>
 
-          <Route path = '/Logout'>
+          <Route path = '/Logout' exact>
             <Logout />
           </Route>
 
-          <Redirect to = '/Dashboard' />
+          <Redirect to = '/Dashboard' exact/>
 
         </Switch>
     </BrowserRouter>

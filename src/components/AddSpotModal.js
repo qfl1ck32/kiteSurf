@@ -1,35 +1,62 @@
 import React, { useEffect, useState } from 'react'
 
 import { MDBContainer, MDBModal, MDBModalBody, MDBModalHeader, MDBModalFooter } from 'mdbreact'
-
 import { Button, Form } from 'react-bootstrap'
 
-import GoogleMap from '../components/GoogleMap'
-
-import NewField from '../components/FormField'
+import GoogleMap from './GoogleMap'
+import NewField from './FormField'
 
 import * as Yup from 'yup'
-
 import { useFormik } from 'formik'
 
+import axios from 'axios'
+
+const apiURL = require('../assets/apiURL.json').url
+
 function AddSpotModal(props) {
-
-
     const [spot, setCurrentSpot] = useState({})
-    
     const [showMissingSpotError, setShowMissingSpotError] = useState(false)
+    const [messageAlert, setMessageAlert] = useState({
+        show: false
+    })
 
     useEffect(() => {
         setShowMissingSpotError(false)
     }, [spot])
 
     const addSpot = async () => {
-        return null // to implement
+        let newSpot
+        
+        try {
+            newSpot = await axios.post(apiURL + 'spot')
+
+            const newSpotID = newSpot.data.id
+
+            await axios.put(apiURL + 'spot/' + newSpotID, { name: values.name, country: values.country, lat: spot.lat, long: spot.long, probability: parseInt(values.windProbability), month: values.highSeason })
+        }
+
+        catch (err) {
+            const requestResponse = err.response
+
+            return setMessageAlert({
+                show: true,
+                text: 'Something went wrong. Server replied with: "' + requestResponse.data + '".',
+                type: 'danger'
+            })
+        }
+
+        setMessageAlert({
+            show: true,
+            text: 'Successfully added a new spot - "' + values.name + '"!',
+            type: 'success'
+        })
+
+        props.reloadData()
     }
 
     const center = {
-        lat: 0,
-        lng: 0
+        lat: 45.9443,
+        lng: 25.0094
     }
 
     const mapContainerStyle = {
@@ -40,6 +67,7 @@ function AddSpotModal(props) {
     const validationSchema = Yup.object({
         name: Yup.string().required('This field should not be empty.').min(2, 'This field should have a length of at least two characters.'),
         country: Yup.string().required('This field should not be empty.').min(2, 'This field should have a length of at least two characters.'),
+        windProbability: Yup.number().required('This field should not be empty.').min(0, 'Probability should be positive.').max(100, 'Probability should be less than or equal to 100%.'),
         highSeason: Yup.string().required('This field should not be empty.').min(2, 'This field should have a length of at least two characters.'),
         startEndDate: Yup.date().required('This field should not be empty.')
     })
@@ -49,6 +77,7 @@ function AddSpotModal(props) {
             name: '',
             country: '',
             highSeason: '',
+            windProbability: '',
             startEndDate: '',
 
             fadeErrors: true
@@ -87,12 +116,12 @@ function AddSpotModal(props) {
     const name = NewField(newFieldSetup('Name', 'name', 'Romani', 'text'))
     const country = NewField(newFieldSetup('Country', 'country', 'Spain', 'text'))
     const highSeason = NewField(newFieldSetup('High season', 'highSeason', 'December - March', 'text'))
+    const windProbability = NewField(newFieldSetup('Wind probability', 'windProbability', '93', 'text'))
     const startEndDate = NewField(newFieldSetup('Date', 'startEndDate', '', 'date'))
-
 
     return (
         <MDBModal isOpen = { props.isOpen } toggle = { () => props.setIsOpen(prevState => !prevState) } centered backdrop>
-            <MDBModalHeader className = 'bg-secondary'>Add new spot</MDBModalHeader>
+            <MDBModalHeader className = 'bg-primary'>Add new spot</MDBModalHeader>
 
             <MDBModalBody className = 'bg-primary'>
                 <GoogleMap setCurrentSpot = { setCurrentSpot } withWrap = { false } center = { center } zoom = { 6 } spots = { [spot] } mapContainerStyle = { mapContainerStyle } />
@@ -104,7 +133,10 @@ function AddSpotModal(props) {
                     { name }
                     { country }
                     { highSeason }
+                    { windProbability }
                     { startEndDate }
+                    
+                    <MDBContainer className = { messageAlert.show ? ('alert alert-' + messageAlert.type) : 'd-none' }> { messageAlert.text } </MDBContainer>
 
                     <MDBModalFooter className = 'bg-primary'>
                         <Button onClick = {() => props.setIsOpen(false) } className = 'btn-sm bg-primary'>Cancel</Button>
@@ -114,7 +146,6 @@ function AddSpotModal(props) {
                 
             </MDBModalBody>
             
-
         </MDBModal>
     )
 }
